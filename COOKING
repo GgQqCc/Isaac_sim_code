@@ -1,0 +1,35 @@
+Cooking：原始的几何网格（Mesh）转换为物理引擎能够理解和快速计算的物理数据（SDF 查找表、凸包结构等）的过程
+计算复杂耗时
+Cooking cache：SETTING_USE_LOCAL_MESH_CACHE：第一次加载一个复杂的机器人模型时，系统会“烘焙”它的碰撞体。一直开启
+SETTING_LOCAL_MESH_CACHE_SIZE_MB：本地缓存大小限制
+SETTING_UJITSO_COLLISION_COOKING：启用 UJITSO 烘焙系统（多并发）
+SETTING_UJITSO_COOKING_MAX_PROCESS_COUNT：最大cooking进程数————允许 UJITSO 同时动用多少个进程来干活。
+
+
+直接修改底层配置的代码：
+import carb
+import omni.physx.bindings._physx as physx_bindings
+
+# 1. 获取设置接口
+# settings 是 Isaac Sim 的“中央控制器”，几乎所有的全局参数都通过它修改。
+settings = carb.settings.get_settings()
+
+# 2. 读取当前状态BVH
+# 看看目前是否开启了本地缓存（即之前算好的物理数据是否存硬盘了）。
+use_local_cache = settings.get_as_bool(physx_bindings.SETTING_USE_LOCAL_MESH_CACHE)
+
+# 3. 强制关闭缓存
+# 将这个选项设为 False，意味着系统不再使用硬盘上的缓存数据。
+settings.set_bool(pyhsx_bindings.SETTING_USE_LOCAL_MESH_CACHE, False)
+
+
+
+
+ Cooking Data（烘焙数据）。
+当原始的几何网格 (Geometric Mesh) 转换成物理引擎可用的数据时，它并不是简单地复制形状，而是根据你选择的碰撞近似方式，转换成完全不同的数学结构。
+以下是转换过程及其生成的“数据形态”详解：
+1. 转换的本质：从“视觉网格”到“物理结构”
+几何网格通常由顶点（Points）和三角面片（Triangles）组成，是给显卡渲染看的。而“烘焙”过程会将这些几何信息重新组织，生成如下几种历史数据：
+SDF 查找表 (SDF Lookup Table)： 如果你使用了 SDF 碰撞，几何网格会被离散化为一个均匀网格（Uniform Grid）。每个格子存储一个“符号距离”数值，这种数据允许引擎通过“查表”快速计算碰撞力。
+凸包数据结构 (Convex Hull Data)： 引擎会提取网格最外层的顶点，计算出一个最小凸多面体。历史数据中只保留这个凸多面体的面和边信息，丢弃内部的复杂细节。
+层次包围盒树 (BVH - Bounding Volume Hierarchy)： 对于精确网格（Triangle Mesh），引擎会生成一棵树状结构。它将数万个三角形分组打包成逐级嵌套的盒子，以便在碰撞时快速排除无关区域。
