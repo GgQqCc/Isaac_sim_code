@@ -22,7 +22,9 @@ use_local_cache = settings.get_as_bool(physx_bindings.SETTING_USE_LOCAL_MESH_CAC
 # 将这个选项设为 False，意味着系统不再使用硬盘上的缓存数据。
 settings.set_bool(pyhsx_bindings.SETTING_USE_LOCAL_MESH_CACHE, False)
 
-
+检测阶段,算不算撞到了？,SDF 分辨率、BVH 树、Convex Hull
+响应阶段,撞到后往哪飞？多大力？,摩擦力、弹力、刚体质量（Mass）
+判断阶段,算法如何知道？,Contact Sensor、ROS_graph 信号、物理属性查询
 
 
  Cooking Data（烘焙数据）。
