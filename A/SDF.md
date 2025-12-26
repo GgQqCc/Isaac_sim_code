@@ -13,7 +13,7 @@ Signed（符号）： * 如果点在螺母外面，数值是正的（比如 +5cm
 敏感区（离表面近）： 只有当点靠近表面（接近 0）的时候，我才把这个大格子切成更小的格子（Subgrids）。
 
 ![Uploading image.png…]()
-
+A sparse SDF consists of a background SDF and subgrids in the vicinty of surfaces
 
 1. 窄带交界区 (Region intersecting narrow band) —— 精细计算区
 图中表现：你可以看到在物体边缘（蓝色区域边缘）有一圈灰色阴影带，里面布满了细密的小绿点。
