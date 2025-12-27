@@ -1,0 +1,41 @@
+
+
+#创建一个具有物理属性的几何立方体，其次是精细调节该物体的碰撞触发边界。
+
+from pxr import Usd, UsdGeom, UsdPhysics, Gf
+import omni.usd
+
+# Create a stage
+omni.usd.get_context().new_stage()
+stage = omni.usd.get_context().get_stage()
+
+# Define the root Xform (transformable object)
+rootxform = UsdGeom.Xform.Define(stage, "/World")
+
+cubePath = "/World/cube"
+
+# rest and collision offset
+restOffset = 0.0
+contactOffset = 0.02
+
+# Properties of the geometry
+cubePosition = Gf.Vec3f(2.0, 0.0, 0.0)
+cubeOrientation = Gf.Quatf(1.0)
+cubeScale = Gf.Vec3f(1.0, 1.0, 1.0)
+cubeSize = 2.0
+cubeHalfExtent = cubeSize/2.0
+
+# Create a cube geometry prim
+cubeGeom = UsdGeom.Cube.Define(stage, cubePath)
+cubeGeom.CreateSizeAttr(cubeSize)
+cubeGeom.CreateExtentAttr([Gf.Vec3f(-cubeHalfExtent), Gf.Vec3f(cubeHalfExtent)])
+cubeGeom.AddTranslateOp().Set(cubePosition)
+cubeGeom.AddOrientOp().Set(cubeOrientation)
+cubeGeom.AddScaleOp().Set(cubeScale)
+cubePrim = cubeGeom.GetPrim()
+UsdPhysics.CollisionAPI.Apply(cubePrim)
+
+# Apply PhysxSchema.PhysxCollisionAPI to the cube prim
+physxCollisionAPI = PhysxSchema.PhysxCollisionAPI.Apply(cubePrim)
+physxCollisionAPI.CreateRestOffsetAttr(restOffset)
+physxCollisionAPI.CreateContactOffsetAttr(contactOffset)
